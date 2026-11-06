@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Track {
+  id         Int             @id @default(autoincrement())
+  spotifyId  String?          @unique
+  title      String
+  artists    String
+  album      String?
+  durationMs Int
+  isrc       String?
+  filePath String? @unique
+  fileSize    Int?
+  matchKey    String?
+  createdAt  DateTime        @default(now())
+  playlists  PlaylistTrack[]
+  @@index([matchKey])
+}
+
+model Playlist {
+  id         Int             @id @default(autoincrement())
+  spotifyId  String?          @unique
+  name       String
+  snapshotId String
+  tracks     PlaylistTrack[]
+}
+
+model PlaylistTrack {
+  playlistId Int
+  trackId    Int
+  position   Int
+  addedAt    DateTime
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  track      Track    @relation(fields: [trackId], references: [id])
+
+  @@id([playlistId, position])
+}
